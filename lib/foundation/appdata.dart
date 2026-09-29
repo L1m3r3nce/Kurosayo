@@ -411,7 +411,7 @@ class Settings with ChangeNotifier {
     'customImageProcessing': defaultCustomImageProcessing,
     'sni': true,
     'autoAddLanguageFilter': 'none', // none, chinese, english, japanese
-    'comicSourceListUrl': "",
+    'comicSourceListUrl': "https://cdn.jsdelivr.net/gh/l1m3r3nce/manga_source@main/index.json",
     'comicSourceRepositories': <Map<String, dynamic>>[],
     'comicSourceOrigins': <String, dynamic>{},
     'comicSourceRepositoriesMigrated': false,

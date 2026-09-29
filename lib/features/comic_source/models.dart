@@ -2,6 +2,21 @@ import 'package:venera_next/foundation/comic_type.dart';
 import 'package:venera_next/foundation/extensions.dart';
 import 'package:venera_next/foundation/history_contract.dart';
 
+/// Content of a chapter. Either a list of image urls or a text body (novel).
+class EpisodeContent {
+  final List<String> images;
+
+  /// When non-empty, this is a text chapter (e.g. light novel).
+  final String? text;
+
+  /// Optional chapter title shown at the top of the text reader.
+  final String? title;
+
+  const EpisodeContent({this.images = const [], this.text, this.title});
+
+  bool get isText => text != null && text!.isNotEmpty;
+}
+
 class Comment {
   final String userName;
   final String? avatar;

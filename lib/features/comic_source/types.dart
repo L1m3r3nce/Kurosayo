@@ -14,7 +14,7 @@ typedef LoginFunction = Future<Res<bool>> Function(String, String);
 typedef LoadComicFunc = Future<Res<ComicDetails>> Function(String id);
 
 typedef LoadComicPagesFunc =
-    Future<Res<List<String>>> Function(String id, String? ep);
+    Future<Res<EpisodeContent>> Function(String id, String? ep);
 
 typedef CommentsLoader =
     Future<Res<List<Comment>>> Function(

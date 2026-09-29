@@ -143,6 +143,12 @@ class ReaderState extends State<Reader>
   @override
   List<String>? images;
 
+  /// Non-null when the current chapter is a text chapter (novel).
+  String? novelText;
+
+  /// Optional title of the current text chapter.
+  String? novelTitle;
+
   @override
   late ReaderMode mode;
 
