@@ -282,7 +282,7 @@ class RHttpAdapter implements HttpClientAdapter {
   ) async {
     if (options.headers['User-Agent'] == null &&
         options.headers['user-agent'] == null) {
-      options.headers['User-Agent'] = "VeneraNext/v${App.version}";
+      options.headers['User-Agent'] = "Kurosayo/v${App.version}";
     }
 
     final nativeCancelToken = cancelFuture == null ? null : rhttp.CancelToken();

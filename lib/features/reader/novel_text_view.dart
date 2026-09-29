@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:venera_next/features/reader/reader_page.dart';
-import 'package:venera_next/features/reader/scaffold.dart';
+
 
 /// Text chapter (light novel) view.
 class NovelTextView extends StatefulWidget {
