@@ -377,8 +377,10 @@ class ImagesDownloadTask extends DownloadTask with _TransferSpeedMixin {
           var r = await source.loadComicPages!(comicId, null);
           if (r.error) {
             throw r.errorMessage!;
+          } else if (r.data.isText) {
+            throw "Text chapters (novels) are not supported for download yet";
           } else {
-            return r.data;
+            return r.data.images;
           }
         });
         if (!_isRunning) {

@@ -221,6 +221,10 @@ class ReaderGestureDetectorState
   }
 
   void onTap(Offset location) {
+    if (reader.novelText != null) {
+      // Text chapters handle taps in their own view.
+      return;
+    }
     if (reader.imageViewController!.handleOnTap(location)) {
       return;
     } else if (context.readerScaffold.isOpen) {

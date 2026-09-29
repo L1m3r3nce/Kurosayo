@@ -368,6 +368,13 @@ class ReaderScaffoldState extends State<ReaderScaffold>
 
   void addImageFavorite() async {
     try {
+      if (context.reader.novelText != null || context.reader.images == null) {
+        showToast(
+          message: "Text chapters have no images to favorite".tl,
+          context: context,
+        );
+        return;
+      }
       if (context.reader.images![0].contains('file://')) {
         showToast(
           message: "Local comic collection is not supported at present".tl,

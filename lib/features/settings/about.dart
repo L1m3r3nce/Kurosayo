@@ -91,7 +91,7 @@ class _AboutSettingsState extends State<AboutSettings> {
           title: const Text("Github"),
           trailing: const Icon(Icons.open_in_new),
           onTap: () {
-            launchUrlString("https://github.com/CyrilPeng/venera-next");
+            launchUrlString("https://github.com/L1m3r3nce/Kurosayo");
           },
         ).toSliver(),
         ListTile(
@@ -316,8 +316,8 @@ Future<String?> _fetchLatestReleaseVersion({
 }) async {
   var res = await AppDio().get(
     includePrerelease
-        ? "https://api.github.com/repos/CyrilPeng/venera-next/releases?per_page=20"
-        : "https://api.github.com/repos/CyrilPeng/venera-next/releases/latest",
+        ? "https://api.github.com/repos/L1m3r3nce/Kurosayo/releases?per_page=20"
+        : "https://api.github.com/repos/L1m3r3nce/Kurosayo/releases/latest",
   );
   if (res.statusCode == 200) {
     var data = res.data is String ? jsonDecode(res.data) : res.data;
@@ -354,7 +354,7 @@ Future<void> checkUpdateUi([
                 onPressed: () {
                   Navigator.pop(context);
                   launchUrlString(
-                    "https://github.com/CyrilPeng/venera-next/releases",
+                    "https://github.com/L1m3r3nce/Kurosayo/releases",
                   );
                 },
                 child: Text("Update".tl),

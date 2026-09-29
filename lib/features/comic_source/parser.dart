@@ -857,9 +857,21 @@ class ComicSourceParser {
         var res = await JsEngine().runReadCode("""
           ComicSource.sources.$_key.comic.loadEp(${jsonEncode(id)}, ${jsonEncode(ep)})
         """);
+        if (res is! Map<String, dynamic>) throw "Invalid data";
+        // Novel chapters: loadEp returns {"type": "text", "content"/"text": ...}
+        if (res["type"] == "text" ||
+            res["content"] != null ||
+            res["text"] != null) {
+          var text = (res["content"] ?? res["text"]).toString();
+          if (text.isNotEmpty) {
+            return Res(
+              EpisodeContent(text: text, title: res["title"]?.toString()),
+            );
+          }
+        }
         final result = normalizeComicSourceStringListResult(res, "images");
         if (result == null) throw "Invalid data";
-        return Res(result.items);
+        return Res(EpisodeContent(images: result.items));
       } catch (e, s) {
         Log.error("Network", "$e\n$s");
         return Res.error(e.toString());

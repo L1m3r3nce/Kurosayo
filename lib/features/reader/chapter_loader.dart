@@ -22,7 +22,7 @@ class LocalComicFilesUnavailable implements Exception {
 
 /// Resolve downloaded chapters by ID, independently of the current source's
 /// chapter order. Database download records do not guarantee files still exist.
-Future<List<String>> loadReaderChapterImages({
+Future<EpisodeContent> loadReaderChapterImages({
   required String comicId,
   required ComicType type,
   required int chapter,
@@ -57,7 +57,7 @@ Future<List<String>> loadReaderChapterImages({
           local?.baseDir,
         );
       }
-      return images;
+      return EpisodeContent(images: images);
     } on FileSystemException catch (error, stack) {
       Log.error('Local chapter', {
         'comicId': comicId,

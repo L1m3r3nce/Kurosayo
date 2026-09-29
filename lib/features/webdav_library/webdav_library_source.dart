@@ -621,7 +621,7 @@ class WebDavLibrarySource {
     }
   }
 
-  static Future<Res<List<String>>> loadComicPages(String id, String? ep) async {
+  static Future<Res<EpisodeContent>> loadComicPages(String id, String? ep) async {
     final config = WebDavLibraryConfig.fromSettings();
     if (!config.isValid) {
       return const Res.error('Invalid WebDAV comic library configuration');
@@ -642,7 +642,7 @@ class WebDavLibrarySource {
         if (files.isEmpty) {
           return const Res.error('No images found in the WebDAV chapter');
         }
-        return Res(files);
+        return Res(EpisodeContent(images: files));
       }
 
       final snapshot = await _loadSnapshot(config, id);
@@ -652,7 +652,7 @@ class WebDavLibrarySource {
             .sublist(metadataChapter.start - 1, metadataChapter.end)
             .map((entry) => config.childFilePath(comicPath, entry.name))
             .toList();
-        return Res(files);
+        return Res(EpisodeContent(images: files));
       }
       if (ep?.startsWith(_metadataChapterPrefix) == true) {
         return const Res.error('Invalid WebDAV metadata chapter');
@@ -664,7 +664,7 @@ class WebDavLibrarySource {
         if (files.isEmpty) {
           return const Res.error('No images found in the WebDAV chapter');
         }
-        return Res(files);
+        return Res(EpisodeContent(images: files));
       }
       return const Res.error('No images found in the WebDAV chapter');
     } catch (e) {

@@ -27,6 +27,7 @@ import 'package:venera_next/foundation/image_provider/reader_image.dart';
 import 'package:venera_next/foundation/log.dart';
 import 'package:venera_next/foundation/translations.dart';
 import 'package:venera_next/foundation/widget_utils.dart';
+import 'package:venera_next/features/reader/novel_text_view.dart';
 import 'package:venera_next/network/images.dart';
 
 class ReaderImages extends StatefulWidget {
@@ -96,7 +97,15 @@ class ReaderImagesState extends State<ReaderImages> {
         onOnlineFallback: reader.onLocalChapterRecoveredOnline,
       );
       if (!mounted) return;
-      reader.images = images;
+      if (images.isText) {
+        reader.images = null;
+        reader.novelText = images.text;
+        reader.novelTitle = images.title;
+      } else {
+        reader.images = images.images;
+        reader.novelText = null;
+        reader.novelTitle = null;
+      }
       await reader.prepareReadingMode();
       if (!mounted) return;
       setState(() {
@@ -148,6 +157,9 @@ class ReaderImagesState extends State<ReaderImages> {
         ),
       );
     } else {
+      if (reader.novelText != null) {
+        return const NovelTextView();
+      }
       if (reader.mode.isGallery) {
         var showComments =
             appdata.settings.getReaderSetting(
@@ -860,7 +872,13 @@ class ContinuousModeState extends State<_ContinuousMode>
       chapter: chapter,
       chapters: reader.widget.chapters,
       onOnlineFallback: reader.onLocalChapterRecoveredOnline,
-    );
+    ).then((content) {
+      if (content.isText) {
+        // Text chapters are not part of the cross-chapter waterfall.
+        throw 'Text chapter';
+      }
+      return content.images;
+    });
   }
 
   Future<void> _ensureWaterfallImagesAfter(int current) async {

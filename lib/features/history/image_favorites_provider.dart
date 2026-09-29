@@ -149,7 +149,13 @@ class ImageFavoritesProvider
       throw "Error: Comic source not found.";
     }
     var res = await comicSource.loadComicPages!(cid, eid);
-    return res.data[page - 1];
+    if (res.error) {
+      throw "Error: ${res.errorMessage}";
+    }
+    if (res.data.isText) {
+      throw "Error: Text chapter has no images.";
+    }
+    return res.data.images[page - 1];
   }
 
   @override
