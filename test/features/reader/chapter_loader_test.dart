@@ -68,7 +68,7 @@ void main() {
     ComicSourceManager().add(
       source((id, ep) async {
         onlineCalls++;
-        return Res(['https://example.invalid/${ep!}.jpg']);
+        return Res(EpisodeContent(images: ['https://example.invalid/${ep!}.jpg']));
       }),
     );
   });
@@ -104,13 +104,16 @@ void main() {
     int chapter = 1,
     ComicChapters chapters = _chapters,
     void Function()? onOnlineFallback,
-  }) => loadReaderChapterImages(
-    comicId: 'book',
-    type: local ? ComicType.local : _type,
-    chapter: chapter,
-    chapters: chapters,
-    onOnlineFallback: onOnlineFallback,
-  );
+  }) async {
+    final content = await loadReaderChapterImages(
+      comicId: 'book',
+      type: local ? ComicType.local : _type,
+      chapter: chapter,
+      chapters: chapters,
+      onOnlineFallback: onOnlineFallback,
+    );
+    return content.images;
+  }
 
   test(
     'downloaded chapter remains readable after reopening the database',

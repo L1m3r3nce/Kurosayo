@@ -8,7 +8,6 @@ import 'package:venera_next/components/button.dart';
 import 'package:venera_next/components/message.dart';
 import 'package:venera_next/components/scroll.dart';
 import 'package:venera_next/features/settings/setting_components.dart';
-import 'package:venera_next/features/settings/sponsors.dart';
 import 'package:venera_next/foundation/app.dart';
 import 'package:venera_next/foundation/context.dart';
 import 'package:venera_next/foundation/log.dart';
@@ -54,7 +53,7 @@ class _AboutSettingsState extends State<AboutSettings> {
             const SizedBox(height: 8),
             Text("V${App.version}", style: const TextStyle(fontSize: 16)),
             Text(
-              "VeneraNext is a free and open-source app for comic reading.".tl,
+              "Kurosayo is a free and open-source app for comic reading.".tl,
             ),
             const SizedBox(height: 8),
           ],
@@ -92,13 +91,6 @@ class _AboutSettingsState extends State<AboutSettings> {
           trailing: const Icon(Icons.open_in_new),
           onTap: () {
             launchUrlString("https://github.com/L1m3r3nce/Kurosayo");
-          },
-        ).toSliver(),
-        ListTile(
-          title: Text("Sponsors".tl),
-          trailing: const Icon(Icons.keyboard_arrow_right),
-          onTap: () {
-            context.to(() => const SponsorsPage());
           },
         ).toSliver(),
       ],

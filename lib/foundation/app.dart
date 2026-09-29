@@ -73,12 +73,12 @@ class _App {
 
   final Appdata data = appdata;
 
-  static const _windowsCompanyDirectory = 'com.github.cyrilpeng';
-  static const _windowsProductDirectory = 'VeneraNext';
+  static const _windowsCompanyDirectory = 'com.l1m3r3nce';
+  static const _windowsProductDirectory = 'Kurosayo';
   static const _legacyWindowsDirectories = [
-    ('CyrilPeng_venera-next', 'VeneraNext'),
+    ('CyrilPeng_venera-next', 'Kurosayo'),
     ('CyrilPeng_venera-next', 'venera'),
-    ('com.github.wgh136', 'venera'),
+    ('com.l1m3r3nce', 'venera'),
   ];
 
   void rootPop() {
