@@ -98,7 +98,9 @@ class _SmoothScrollProviderState extends State<SmoothScrollProvider> {
       return widget.builder(
         context,
         _controller,
-        const BouncingScrollPhysics(),
+        const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
       );
     }
     var child = Listener(
@@ -172,7 +174,11 @@ class _SmoothScrollProviderState extends State<SmoothScrollProvider> {
           _controller,
           _isMouseScroll
               ? const NeverScrollableScrollPhysics()
-              : const BouncingScrollPhysics(),
+              : const AlwaysScrollableScrollPhysics(
+                  // Keep iOS-style bounce but also allow dragging when the
+                  // list is empty, so pull-to-refresh always works.
+                  parent: BouncingScrollPhysics(),
+                ),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import 'package:venera_next/components/layout.dart';
 import 'package:venera_next/components/loading.dart';
 import 'package:venera_next/components/menu.dart';
 import 'package:venera_next/components/message.dart';
+import 'package:venera_next/components/pull_to_refresh.dart';
 import 'package:venera_next/components/scroll.dart';
 import 'package:venera_next/features/comic_source/comic_source.dart';
 import 'package:venera_next/features/comic_widgets/comic_widgets.dart';
@@ -112,99 +113,96 @@ class _NormalFavoritePageState extends State<_NormalFavoritePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ComicList(
-      key: comicListKey,
-      leadingSliver: SliverAppbar(
-        style: context.width < changePoint
-            ? AppbarStyle.shadow
-            : AppbarStyle.blur,
-        leading: Tooltip(
-          message: "Folders".tl,
-          child: context.width <= favoritesTwoPanelChangeWidth
-              ? IconButton(
-                  icon: const Icon(Icons.menu),
-                  color: context.colorScheme.primary,
-                  onPressed: widget.showFolders,
-                )
-              : null,
+    return PullToRefresh(
+      onRefresh: () async {
+        // Force refresh bypassing cache, same as the appbar refresh button.
+        NetworkCacheManager().clear();
+        comicListKey.currentState?.refresh();
+        await Future.delayed(const Duration(milliseconds: 400));
+      },
+      child: ComicList(
+        key: comicListKey,
+        leadingSliver: SliverAppbar(
+          style: context.width < changePoint
+              ? AppbarStyle.shadow
+              : AppbarStyle.blur,
+          leading: Tooltip(
+            message: "Folders".tl,
+            child: context.width <= favoritesTwoPanelChangeWidth
+                ? IconButton(
+                    icon: const Icon(Icons.menu),
+                    color: context.colorScheme.primary,
+                    onPressed: widget.showFolders,
+                  )
+                : null,
+          ),
+          title: GestureDetector(
+            onTap: context.width < favoritesTwoPanelChangeWidth
+                ? widget.showFolders
+                : null,
+            child: Text(widget.data.title),
+          ),
+          actions: [
+            const FavoriteDisplayButton(),
+            MenuButton(
+              entries: [
+                MenuEntry(
+                  icon: Icons.sync,
+                  text: "Convert to local".tl,
+                  onClick: () {
+                    importNetworkFolder(widget.data.key, 9999999, null, null);
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
-        title: GestureDetector(
-          onTap: context.width < favoritesTwoPanelChangeWidth
-              ? widget.showFolders
-              : null,
-          child: Text(widget.data.title),
+        errorLeading: Appbar(
+          leading: Tooltip(
+            message: "Folders".tl,
+            child: context.width <= favoritesTwoPanelChangeWidth
+                ? IconButton(
+                    icon: const Icon(Icons.menu),
+                    color: context.colorScheme.primary,
+                    onPressed: widget.showFolders,
+                  )
+                : null,
+          ),
+          title: GestureDetector(
+            onTap: context.width < favoritesTwoPanelChangeWidth
+                ? widget.showFolders
+                : null,
+            child: Text(widget.data.title),
+          ),
         ),
-        actions: [
-          const FavoriteDisplayButton(),
-          Tooltip(
-            message: "Refresh".tl,
-            child: IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                // Force refresh bypassing cache
-                NetworkCacheManager().clear();
-                comicListKey.currentState!.refresh();
+        loadPage: widget.data.loadComic == null
+            ? null
+            : (i) => widget.data.loadComic!(i),
+        loadNext: widget.data.loadNext == null
+            ? null
+            : (next) => widget.data.loadNext!(next),
+        menuBuilder: (comic) {
+          return [
+            MenuEntry(
+              icon: Icons.delete_outline,
+              text: "Remove".tl,
+              onClick: () async {
+                var res = await _deleteComic(
+                  comic.id,
+                  null,
+                  comic.sourceKey,
+                  comic.favoriteId,
+                );
+                if (res) {
+                  comicListKey.currentState!.remove(comic);
+                }
               },
             ),
-          ),
-          MenuButton(
-            entries: [
-              MenuEntry(
-                icon: Icons.sync,
-                text: "Convert to local".tl,
-                onClick: () {
-                  importNetworkFolder(widget.data.key, 9999999, null, null);
-                },
-              ),
-            ],
-          ),
-        ],
+          ];
+        },
+        enablePageStorage: true,
+        useFavoriteDisplaySettings: true,
       ),
-      errorLeading: Appbar(
-        leading: Tooltip(
-          message: "Folders".tl,
-          child: context.width <= favoritesTwoPanelChangeWidth
-              ? IconButton(
-                  icon: const Icon(Icons.menu),
-                  color: context.colorScheme.primary,
-                  onPressed: widget.showFolders,
-                )
-              : null,
-        ),
-        title: GestureDetector(
-          onTap: context.width < favoritesTwoPanelChangeWidth
-              ? widget.showFolders
-              : null,
-          child: Text(widget.data.title),
-        ),
-      ),
-      loadPage: widget.data.loadComic == null
-          ? null
-          : (i) => widget.data.loadComic!(i),
-      loadNext: widget.data.loadNext == null
-          ? null
-          : (next) => widget.data.loadNext!(next),
-      menuBuilder: (comic) {
-        return [
-          MenuEntry(
-            icon: Icons.delete_outline,
-            text: "Remove".tl,
-            onClick: () async {
-              var res = await _deleteComic(
-                comic.id,
-                null,
-                comic.sourceKey,
-                comic.favoriteId,
-              );
-              if (res) {
-                comicListKey.currentState!.remove(comic);
-              }
-            },
-          ),
-        ];
-      },
-      enablePageStorage: true,
-      useFavoriteDisplaySettings: true,
     );
   }
 }
@@ -572,53 +570,60 @@ class _FavoriteFolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ComicList(
-      key: comicListKey,
-      enablePageStorage: true,
-      leadingSliver: SliverAppbar(
-        title: Text(title),
-        actions: [
-          const FavoriteDisplayButton(),
-          MenuButton(
-            entries: [
-              MenuEntry(
-                icon: Icons.sync,
-                text: "Convert to local".tl,
-                onClick: () {
-                  importNetworkFolder(data.key, 9999999, title, folderID);
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-      errorLeading: Appbar(title: Text(title)),
-      loadPage: data.loadComic == null
-          ? null
-          : (i) => data.loadComic!(i, folderID),
-      loadNext: data.loadNext == null
-          ? null
-          : (next) => data.loadNext!(next, folderID),
-      menuBuilder: (comic) {
-        return [
-          MenuEntry(
-            icon: Icons.delete_outline,
-            text: "Remove".tl,
-            onClick: () async {
-              var res = await _deleteComic(
-                comic.id,
-                null,
-                comic.sourceKey,
-                comic.favoriteId,
-              );
-              if (res) {
-                comicListKey.currentState!.remove(comic);
-              }
-            },
-          ),
-        ];
+    return PullToRefresh(
+      onRefresh: () async {
+        NetworkCacheManager().clear();
+        comicListKey.currentState?.refresh();
+        await Future.delayed(const Duration(milliseconds: 400));
       },
-      useFavoriteDisplaySettings: true,
+      child: ComicList(
+        key: comicListKey,
+        enablePageStorage: true,
+        leadingSliver: SliverAppbar(
+          title: Text(title),
+          actions: [
+            const FavoriteDisplayButton(),
+            MenuButton(
+              entries: [
+                MenuEntry(
+                  icon: Icons.sync,
+                  text: "Convert to local".tl,
+                  onClick: () {
+                    importNetworkFolder(data.key, 9999999, title, folderID);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+        errorLeading: Appbar(title: Text(title)),
+        loadPage: data.loadComic == null
+            ? null
+            : (i) => data.loadComic!(i, folderID),
+        loadNext: data.loadNext == null
+            ? null
+            : (next) => data.loadNext!(next, folderID),
+        menuBuilder: (comic) {
+          return [
+            MenuEntry(
+              icon: Icons.delete_outline,
+              text: "Remove".tl,
+              onClick: () async {
+                var res = await _deleteComic(
+                  comic.id,
+                  null,
+                  comic.sourceKey,
+                  comic.favoriteId,
+                );
+                if (res) {
+                  comicListKey.currentState!.remove(comic);
+                }
+              },
+            ),
+          ];
+        },
+        useFavoriteDisplaySettings: true,
+      ),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:venera_next/foundation/widget_utils.dart';
 import 'effects.dart';
 import 'gesture.dart';
 import 'scroll.dart';
+import 'wallpaper.dart';
 
 class Appbar extends StatefulWidget implements PreferredSizeWidget {
   const Appbar({
@@ -90,7 +91,9 @@ class _AppbarState extends State<Appbar> {
       decoration: BoxDecoration(
         color:
             widget.backgroundColor ??
-            context.colorScheme.surface.toOpacity(0.86),
+            context.colorScheme.surface.toOpacity(
+              Wallpapers.enabled ? 0.55 : 0.86,
+            ),
       ),
       height: _kAppBarHeight + context.padding.top,
       child: Row(
@@ -119,11 +122,17 @@ class _AppbarState extends State<Appbar> {
       ).paddingTop(context.padding.top),
     );
     if (widget.style == AppbarStyle.shadow) {
-      return Material(
-        color: context.colorScheme.surface,
+      Widget bar = Material(
+        color: Wallpapers.enabled
+            ? context.colorScheme.surface.toOpacity(0.62)
+            : context.colorScheme.surface,
         elevation: _scrolledUnder ? 2 : 0,
         child: content,
       );
+      if (Wallpapers.enabled) {
+        return BlurEffect(blur: 15, child: bar);
+      }
+      return bar;
     } else {
       return BlurEffect(blur: _scrolledUnder ? 15 : 0, child: content);
     }
@@ -230,7 +239,9 @@ class _MySliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         child: BlurEffect(
           blur: 15,
           child: Material(
-            color: context.colorScheme.surface.toOpacity(0.86),
+            color: context.colorScheme.surface.toOpacity(
+              Wallpapers.enabled ? 0.55 : 0.86,
+            ),
             elevation: 0,
             borderRadius: BorderRadius.circular(radius),
             child: body,
@@ -238,14 +249,20 @@ class _MySliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         ),
       );
     } else {
-      return SizedBox.expand(
+      Widget bar = SizedBox.expand(
         child: Material(
-          color: context.colorScheme.surface,
+          color: Wallpapers.enabled
+              ? context.colorScheme.surface.toOpacity(0.62)
+              : context.colorScheme.surface,
           elevation: shrinkOffset == 0 ? 0 : 2,
           borderRadius: BorderRadius.circular(radius),
           child: body,
         ),
       );
+      if (Wallpapers.enabled) {
+        return BlurEffect(blur: 15, child: bar);
+      }
+      return bar;
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:venera_next/components/appbar.dart';
 import 'package:venera_next/components/gesture.dart';
 import 'package:venera_next/components/loading.dart';
 import 'package:venera_next/components/pop_up_widget.dart';
+import 'package:venera_next/components/wallpaper.dart';
 import 'package:venera_next/foundation/app.dart';
 import 'package:venera_next/foundation/appdata.dart';
 import 'package:venera_next/foundation/context.dart';
@@ -108,6 +109,7 @@ class _CategoriesPageState extends State<CategoriesPage>
     }
 
     return Material(
+      color: Wallpapers.enabled ? Colors.transparent : null,
       child: Column(
         children: [
           AppTabBar(

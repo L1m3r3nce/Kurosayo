@@ -10,6 +10,7 @@ import 'package:venera_next/components/layout.dart';
 import 'package:venera_next/components/menu.dart';
 import 'package:venera_next/components/message.dart';
 import 'package:venera_next/components/pop_up_widget.dart';
+import 'package:venera_next/components/pull_to_refresh.dart';
 import 'package:venera_next/components/scroll.dart';
 import 'package:venera_next/components/select.dart';
 import 'package:venera_next/features/comic_details/comic_details.dart';
@@ -804,6 +805,13 @@ class _LocalFavoritesPageState extends State<LocalFavoritesPage> {
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         child: body,
       ),
+    );
+    body = PullToRefresh(
+      onRefresh: () async {
+        updateComics();
+        await Future.delayed(const Duration(milliseconds: 350));
+      },
+      child: body,
     );
     return PopScope(
       canPop: !multiSelectMode && !searchMode,
