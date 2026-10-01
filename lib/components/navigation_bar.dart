@@ -11,7 +11,9 @@ import 'package:venera_next/foundation/edge_back_gesture.dart';
 import 'package:venera_next/foundation/widget_utils.dart';
 
 import 'consts.dart';
+import 'effects.dart';
 import 'gesture.dart';
+import 'wallpaper.dart';
 
 class PaneItemEntry {
   String label;
@@ -20,11 +22,30 @@ class PaneItemEntry {
 
   IconData activeIcon;
 
+  /// Optional image assets (bilibili-skin style character icons).
+  /// When set, they replace [icon]/[activeIcon] in the navigation bar.
+  String? iconAsset;
+
+  String? activeIconAsset;
+
   PaneItemEntry({
     required this.label,
     required this.icon,
     required this.activeIcon,
+    this.iconAsset,
+    this.activeIconAsset,
   });
+
+  /// Renders the entry icon: character image when available, icon otherwise.
+  Widget buildIcon(BuildContext context, {double? size, bool? active}) {
+    if (iconAsset != null) {
+      var asset = (active ?? false) && activeIconAsset != null
+          ? activeIconAsset!
+          : iconAsset!;
+      return Image.asset(asset, width: size, fit: BoxFit.fitWidth);
+    }
+    return Icon(active == true ? this.activeIcon : icon, size: size);
+  }
 }
 
 class PaneActionEntry {
@@ -274,7 +295,10 @@ class NaviPaneState extends State<NaviPane>
   }
 
   Widget buildTop() {
-    return Material(
+    Widget bar = Material(
+      color: Wallpapers.enabled
+          ? Theme.of(context).colorScheme.surface.toOpacity(0.55)
+          : null,
       child: Container(
         padding: const EdgeInsets.only(left: 16, right: 16),
         height: _kTopBarHeight,
@@ -298,11 +322,18 @@ class NaviPaneState extends State<NaviPane>
         ),
       ),
     );
+    if (Wallpapers.enabled) {
+      return BlurEffect(blur: 18, child: bar);
+    }
+    return bar;
   }
 
   Widget buildBottom() {
-    return Material(
+    Widget bar = Material(
       textStyle: Theme.of(context).textTheme.labelSmall,
+      color: Wallpapers.enabled
+          ? Theme.of(context).colorScheme.surface.toOpacity(0.6)
+          : null,
       elevation: 0,
       child: Container(
         height: _kBottomBarHeight,
@@ -330,6 +361,10 @@ class NaviPaneState extends State<NaviPane>
         ),
       ),
     );
+    if (Wallpapers.enabled) {
+      return BlurEffect(blur: 18, child: bar);
+    }
+    return bar;
   }
 
   Widget buildLeft() {
@@ -414,7 +449,7 @@ class _SideNaviWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final icon = Icon(enabled ? entry.activeIcon : entry.icon);
+    final icon = entry.buildIcon(context, size: 26, active: enabled);
     return ClickInkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
@@ -542,6 +577,33 @@ class _SingleBottomNaviWidgetState extends State<_SingleBottomNaviWidget>
   Widget buildContent() {
     final value = controller.value;
     final colorScheme = Theme.of(context).colorScheme;
+    if (widget.entry.iconAsset != null) {
+      final selected = widget.enabled || value > 0.5;
+      final w = 38.0 + value * 8;
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: w * 135 / 180,
+              width: w,
+              child: widget.entry.buildIcon(context, size: w, active: selected),
+            ),
+            const SizedBox(height: 1),
+            Text(
+              widget.entry.label,
+              style: TextStyle(
+                fontSize: 10,
+                height: 1.0,
+                color: selected
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     final icon = Icon(
       widget.enabled ? widget.entry.activeIcon : widget.entry.icon,
     );
@@ -690,6 +752,8 @@ class _NaviMainViewState extends State<_NaviMainView> {
   @override
   Widget build(BuildContext context) {
     var shouldShowAppBar = state.controller.value < 2;
+    // The wallpaper lives at the MaterialApp builder level, so pushed routes
+    // (comic details, search, ...) also sit on top of it.
     return Column(
       children: [
         if (shouldShowAppBar) state.buildTop().paddingTop(context.padding.top),

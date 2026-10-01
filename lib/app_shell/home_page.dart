@@ -21,6 +21,7 @@ class HomePage extends StatelessWidget {
       slivers: [
         SliverPadding(padding: EdgeInsets.only(top: context.padding.top)),
         const SearchEntry(),
+        const HomeMascot(),
         const SyncStatusSummary(),
         const HistorySummary(),
         const ReadLaterSummary(),
@@ -32,5 +33,44 @@ class HomePage extends StatelessWidget {
       ],
     );
     return context.width > changePoint ? widget.paddingHorizontal(8) : widget;
+  }
+}
+
+/// The mascot figure ("看板娘") shown at the top of the home page,
+/// in the style of bilibili's personalized skin.
+class HomeMascot extends StatefulWidget {
+  const HomeMascot({super.key});
+
+  @override
+  State<HomeMascot> createState() => _HomeMascotState();
+}
+
+class _HomeMascotState extends State<HomeMascot>
+    with SingleTickerProviderStateMixin {
+  late final controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Center(
+        child: AnimatedBuilder(
+          animation: controller,
+          builder: (context, child) {
+            var dy = (controller.value * 2 - 1) * 6;
+            return Transform.translate(offset: Offset(0, dy), child: child);
+          },
+          child: Image.asset('assets/mascot.png', height: 170),
+        ),
+      ),
+    );
   }
 }

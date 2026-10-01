@@ -340,6 +340,8 @@ class Settings with ChangeNotifier {
     'favoritesGalleryColumns': 0, // 0 means automatic, 2-6 are fixed
     'color': 'system', // red, pink, purple, green, orange, blue
     'theme_mode': 'system', // light, dark, system
+    'wallpaperMode': 'none', // none, bili, kurosayo, image
+    'wallpaperOpacity': 0.35, // veil over the wallpaper, 0.0 - 0.8
     'newFavoriteAddTo': 'end', // start, end
     'moveFavoriteAfterRead': 'none', // none, end, start
     'proxy': 'system', // direct, system, proxy string
@@ -554,11 +556,23 @@ class Settings with ChangeNotifier {
       final key = switch (comicLayout(comicId, sourceKey)) {
         ComicLayout.paged => 'pagedReaderMode',
         ComicLayout.longStrip => 'longStripReaderMode',
-        ComicLayout.unknown => 'readerMode',
+        // While the layout is still unknown, prefer the user's consistent
+        // paged/long-strip preference over the base "readerMode", so the
+        // reader doesn't open in one mode and visibly switch after detection.
+        ComicLayout.unknown => _unknownLayoutReaderModeKey(),
       };
       return getDeviceReaderSetting(key) as String;
     }
     return getDeviceReaderSetting('readerMode') as String;
+  }
+
+  String _unknownLayoutReaderModeKey() {
+    final paged = getDeviceReaderSetting('pagedReaderMode');
+    final longStrip = getDeviceReaderSetting('longStripReaderMode');
+    if (paged is String && longStrip is String && paged == longStrip) {
+      return 'pagedReaderMode';
+    }
+    return 'readerMode';
   }
 
   void setActiveReaderSetting(

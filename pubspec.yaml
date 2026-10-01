@@ -106,6 +106,8 @@ flutter:
     - assets/translation.json
     - assets/init.js
     - assets/app_icon.png
+    - assets/mascot.png
+    - assets/navi/
     - assets/tags.json
     - assets/tags_tw.json
     - assets/opencc.txt

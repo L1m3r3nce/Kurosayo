@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:venera_next/components/appbar.dart';
 import 'package:venera_next/components/loading.dart';
 import 'package:venera_next/components/navigation_bar.dart';
+import 'package:venera_next/components/pull_to_refresh.dart';
 import 'package:venera_next/components/pop_up_widget.dart';
 import 'package:venera_next/components/scroll.dart';
+import 'package:venera_next/components/wallpaper.dart';
 import 'package:venera_next/features/comic_widgets/comic_widgets.dart';
 import 'package:venera_next/foundation/app.dart';
 import 'package:venera_next/foundation/appdata.dart';
@@ -29,10 +31,6 @@ class ExplorePage extends StatefulWidget {
 class _ExplorePageState extends State<ExplorePage>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin<ExplorePage> {
   late TabController controller;
-
-  bool showFB = true;
-
-  double location = 0;
 
   late List<String> pages;
 
@@ -99,15 +97,6 @@ class _ExplorePageState extends State<ExplorePage>
     GlobalState.find<_SingleExplorePageState>(currentPageId).refresh();
   }
 
-  Widget buildFAB() => Material(
-    color: Colors.transparent,
-    child: FloatingActionButton(
-      key: const Key("FAB"),
-      onPressed: refresh,
-      child: const Icon(Icons.refresh),
-    ),
-  );
-
   Tab buildTab(String i) {
     var comicSource = ComicSource.all().firstWhere(
       (e) => e.explorePages.any((e) => e.title == i),
@@ -115,8 +104,10 @@ class _ExplorePageState extends State<ExplorePage>
     return Tab(text: i.ts(comicSource.key), key: Key(i));
   }
 
-  Widget buildBody(String i) =>
-      Material(child: _SingleExplorePage(i, key: PageStorageKey(i)));
+  Widget buildBody(String i) => Material(
+    color: Wallpapers.enabled ? Colors.transparent : null,
+    child: _SingleExplorePage(i, key: PageStorageKey(i)),
+  );
 
   Widget buildEmpty() {
     var msg = "No Explore Pages".tl;
@@ -147,6 +138,7 @@ class _ExplorePageState extends State<ExplorePage>
     }
 
     Widget tabBar = Material(
+      color: Wallpapers.enabled ? Colors.transparent : null,
       child: AppTabBar(
         key: PageStorageKey(pages.toString()),
         tabs: pages.map((e) => buildTab(e)).toList(),
@@ -159,72 +151,17 @@ class _ExplorePageState extends State<ExplorePage>
       ),
     ).paddingTop(context.padding.top);
 
-    return Stack(
+    return Column(
       children: [
-        Positioned.fill(
-          child: Column(
-            children: [
-              tabBar,
-              Expanded(
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notifications) {
-                    if (notifications.metrics.axis == Axis.horizontal) {
-                      if (!showFB) {
-                        setState(() {
-                          showFB = true;
-                        });
-                      }
-                      return true;
-                    }
-
-                    var current = notifications.metrics.pixels;
-                    var overflow = notifications.metrics.outOfRange;
-                    if (current > location && current != 0 && showFB) {
-                      setState(() {
-                        showFB = false;
-                      });
-                    } else if ((current < location - 50 || current == 0) &&
-                        !showFB) {
-                      setState(() {
-                        showFB = true;
-                      });
-                    }
-                    if ((current > location || current < location - 50) &&
-                        !overflow) {
-                      location = current;
-                    }
-                    return false;
-                  },
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    child: TabBarView(
-                      controller: controller,
-                      children: pages.map((e) => buildBody(e)).toList(),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          right: 16,
-          bottom: 16,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 150),
-            reverseDuration: const Duration(milliseconds: 150),
-            child: showFB ? buildFAB() : const SizedBox(),
-            transitionBuilder: (widget, animation) {
-              var tween = Tween<Offset>(
-                begin: const Offset(0, 1),
-                end: const Offset(0, 0),
-              );
-              return SlideTransition(
-                position: tween.animate(animation),
-                child: widget,
-              );
-            },
+        tabBar,
+        Expanded(
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: TabBarView(
+              controller: controller,
+              children: pages.map((e) => buildBody(e)).toList(),
+            ),
           ),
         ),
       ],
@@ -297,8 +234,9 @@ class _SingleExplorePageState extends AutomaticGlobalState<_SingleExplorePage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    Widget body;
     if (data.loadMultiPart != null) {
-      return _MultiPartExplorePage(
+      body = _MultiPartExplorePage(
         key: const PageStorageKey("comic_list"),
         data: data,
         controller: scrollController,
@@ -308,7 +246,7 @@ class _SingleExplorePageState extends AutomaticGlobalState<_SingleExplorePage>
         },
       );
     } else if (data.loadPage != null || data.loadNext != null) {
-      return ComicList(
+      body = ComicList(
         enablePageStorage: true,
         loadPage: data.loadPage,
         loadNext: data.loadNext,
@@ -322,7 +260,7 @@ class _SingleExplorePageState extends AutomaticGlobalState<_SingleExplorePage>
         },
       );
     } else if (data.loadMixed != null) {
-      return _MixedExplorePage(
+      body = _MixedExplorePage(
         data,
         comicSourceKey,
         key: const PageStorageKey("comic_list"),
@@ -334,23 +272,26 @@ class _SingleExplorePageState extends AutomaticGlobalState<_SingleExplorePage>
     } else {
       return Center(child: Text("Empty Page".tl));
     }
+    return PullToRefresh(onRefresh: _onRefresh, child: body);
   }
 
   @override
   Object? get key => widget.title;
 
-  @override
-  void refresh() {
+  Future<void> _onRefresh() async {
     final onRefresh = data.onRefresh;
     if (onRefresh == null) {
       refreshHandler?.call();
+      await Future.delayed(const Duration(milliseconds: 350));
       return;
     }
-    unawaited(
-      onRefresh().whenComplete(() {
-        reloadHandler?.call();
-      }),
-    );
+    await onRefresh();
+    reloadHandler?.call();
+  }
+
+  @override
+  void refresh() {
+    unawaited(_onRefresh());
   }
 
   @override

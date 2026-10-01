@@ -943,7 +943,7 @@ class _ComicPageLoadingPlaceHolder extends StatelessWidget {
       color: context.isDarkMode ? Colors.grey.shade700 : Colors.white,
       child: Column(
         children: [
-          Appbar(title: Text(""), backgroundColor: context.colorScheme.surface),
+          Appbar(title: Text("")),
           const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,

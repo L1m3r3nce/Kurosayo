@@ -337,6 +337,13 @@ class ReaderScaffoldState extends State<ReaderScaffold>
                   ),
                 ),
               Tooltip(
+                message: "Refresh".tl,
+                child: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: context.reader.reloadCurrentChapter,
+                ),
+              ),
+              Tooltip(
                 message: "Settings".tl,
                 child: IconButton(
                   icon: const Icon(Icons.settings),

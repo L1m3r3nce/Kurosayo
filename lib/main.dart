@@ -13,6 +13,7 @@ import 'package:window_manager/window_manager.dart';
 import 'components/gesture.dart';
 import 'components/js_ui.dart';
 import 'components/message.dart';
+import 'components/wallpaper.dart';
 import 'components/window_frame.dart';
 import 'foundation/app.dart';
 import 'foundation/appdata.dart';
@@ -309,9 +310,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 );
               }
               return _SystemUiProvider(
-                Material(
-                  color: App.isLinux ? Colors.transparent : null,
-                  child: widget,
+                AppWallpaper(
+                  child: Material(
+                    color: App.isLinux || Wallpapers.enabled
+                        ? Colors.transparent
+                        : null,
+                    child: widget,
+                  ),
                 ),
               );
             }

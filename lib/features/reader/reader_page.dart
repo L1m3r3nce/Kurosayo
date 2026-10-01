@@ -450,6 +450,15 @@ class ReaderState extends State<Reader>
     }
   }
 
+  /// Bumping this recreates [ReaderImages] with a fresh key, which re-runs
+  /// the chapter loading pipeline from scratch (= reopening this chapter)
+  /// while keeping the current page position.
+  int reloadToken = 0;
+
+  void reloadCurrentChapter() {
+    setState(() => reloadToken++);
+  }
+
   @override
   Widget build(BuildContext context) {
     _checkImagesPerPageChange();
@@ -461,7 +470,7 @@ class ReaderState extends State<Reader>
         child: ReaderScaffold(
           child: ReaderGestureDetector(
             child: ReaderImages(
-              key: Key(mode.isWaterfall ? mode.key : chapter.toString()),
+              key: Key('$reloadToken-${mode.isWaterfall ? mode.key : chapter}'),
             ),
           ),
         ),
