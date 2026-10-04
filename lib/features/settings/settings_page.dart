@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:venera_next/components/gesture.dart';
 import 'package:venera_next/foundation/app.dart';
+import 'package:venera_next/foundation/appdata.dart';
 import 'package:venera_next/foundation/context.dart';
+import 'package:venera_next/foundation/file_interaction.dart';
 import 'package:venera_next/foundation/translations.dart';
 import 'package:venera_next/foundation/widget_utils.dart';
 import 'package:venera_next/features/history/history.dart';
@@ -259,8 +263,64 @@ class _SettingsPageState extends State<SettingsPage> {
 }
 
 /// Telegram 设置页顶部的档案头:头像 + 名称 + 状态行。
-class _ProfileHeader extends StatelessWidget {
+/// 点击头像可自定义(从本地选图),长按恢复默认看板娘。
+class _ProfileHeader extends StatefulWidget {
   const _ProfileHeader();
+
+  @override
+  State<_ProfileHeader> createState() => _ProfileHeaderState();
+}
+
+class _ProfileHeaderState extends State<_ProfileHeader> {
+  ImageProvider? _customAvatar;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatar();
+  }
+
+  void _loadAvatar() {
+    var path = appdata.implicitData['avatarImagePath'];
+    if (path is String && File(path).existsSync()) {
+      _customAvatar = FileImage(File(path));
+    } else {
+      _customAvatar = null;
+    }
+  }
+
+  Future<void> _pickAvatar() async {
+    var res = await selectFile(
+      ext: const ['png', 'jpg', 'jpeg', 'webp', 'gif'],
+    );
+    if (res == null) return;
+    var dir = Directory("${App.dataPath}/avatar");
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    for (var entity in dir.listSync()) {
+      if (entity is File) {
+        try {
+          entity.deleteSync();
+        } catch (_) {}
+      }
+    }
+    var ext = res.path.split(".").last.toLowerCase();
+    var target = "${dir.path}/current.$ext";
+    await File(res.path).copy(target);
+    appdata.implicitData['avatarImagePath'] = target;
+    appdata.writeImplicitData();
+    await FileImage(File(target)).evict();
+    if (mounted) {
+      setState(() => _loadAvatar());
+    }
+  }
+
+  void _resetAvatar() {
+    appdata.implicitData.remove('avatarImagePath');
+    appdata.writeImplicitData();
+    setState(() => _loadAvatar());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -269,10 +329,15 @@ class _ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: scheme.surfaceContainerHigh,
-            backgroundImage: const AssetImage('assets/mascot.png'),
+          GestureDetector(
+            onTap: _pickAvatar,
+            onLongPress: _resetAvatar,
+            child: CircleAvatar(
+              radius: 26,
+              backgroundColor: scheme.surfaceContainerHigh,
+              backgroundImage:
+                  _customAvatar ?? const AssetImage('assets/mascot.png'),
+            ),
           ),
           const SizedBox(width: 16),
           Column(

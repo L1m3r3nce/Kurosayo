@@ -223,7 +223,9 @@ class _MySliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         const SizedBox(width: 16),
         Expanded(
           child: DefaultTextStyle(
-            style: DefaultTextStyle.of(context).style.copyWith(fontSize: 20),
+            style: DefaultTextStyle.of(
+              context,
+            ).style.copyWith(fontSize: 20, fontWeight: FontWeight.w600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             child: title,
@@ -234,29 +236,45 @@ class _MySliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       ],
     ).paddingTop(topPadding);
 
+    Border? hairline;
+    if (radius == 0 && !Wallpapers.enabled) {
+      hairline = Border(
+        bottom: BorderSide(
+          color: context.colorScheme.outlineVariant.withValues(alpha: 0.6),
+          width: 0.6,
+        ),
+      );
+    }
+
     if (style == AppbarStyle.blur) {
       return SizedBox.expand(
         child: BlurEffect(
           blur: 15,
-          child: Material(
-            color: context.colorScheme.surface.toOpacity(
-              Wallpapers.enabled ? 0.55 : 0.86,
+          child: Container(
+            decoration: hairline == null ? null : BoxDecoration(border: hairline),
+            child: Material(
+              color: context.colorScheme.surface.toOpacity(
+                Wallpapers.enabled ? 0.55 : 0.86,
+              ),
+              elevation: 0,
+              borderRadius: BorderRadius.circular(radius),
+              child: body,
             ),
-            elevation: 0,
-            borderRadius: BorderRadius.circular(radius),
-            child: body,
           ),
         ),
       );
     } else {
       Widget bar = SizedBox.expand(
-        child: Material(
-          color: Wallpapers.enabled
-              ? context.colorScheme.surface.toOpacity(0.62)
-              : context.colorScheme.surface,
-          elevation: shrinkOffset == 0 ? 0 : 2,
-          borderRadius: BorderRadius.circular(radius),
-          child: body,
+        child: Container(
+          decoration: hairline == null ? null : BoxDecoration(border: hairline),
+          child: Material(
+            color: Wallpapers.enabled
+                ? context.colorScheme.surface.toOpacity(0.62)
+                : context.colorScheme.surface,
+            elevation: shrinkOffset == 0 ? 0 : 2,
+            borderRadius: BorderRadius.circular(radius),
+            child: body,
+          ),
         ),
       );
       if (Wallpapers.enabled) {

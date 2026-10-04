@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:venera_next/components/appbar.dart';
 import 'package:venera_next/components/loading.dart';
 import 'package:venera_next/components/navigation_bar.dart';
 import 'package:venera_next/components/pull_to_refresh.dart';
@@ -16,10 +15,10 @@ import 'package:venera_next/features/comic_source/comic_source.dart';
 import 'package:venera_next/foundation/global_state.dart';
 import 'package:venera_next/foundation/res.dart';
 import 'package:venera_next/routing/page_jump_target.dart';
-import 'package:venera_next/routing/settings.dart';
 import 'package:venera_next/foundation/extensions.dart';
 import 'package:venera_next/foundation/translations.dart';
 import 'package:venera_next/foundation/widget_utils.dart';
+import 'package:venera_next/features/settings/settings.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
@@ -29,49 +28,45 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin<ExplorePage> {
-  late TabController controller;
+    with AutomaticKeepAliveClientMixin<ExplorePage> {
+  /// 当前展示的探索页标题,通过右上角按钮打开选择页切换。
+  String? current;
 
-  late List<String> pages;
+  List<String> get allExplorePages => ComicSource.all()
+      .map((e) => e.explorePages.map((e) => e.title).toList())
+      .expand((e) => e)
+      .toList();
+
+  String currentDefault(List<String> all) {
+    var explorePages = List<String>.from(appdata.settings["explore_pages"]);
+    explorePages = explorePages.where((e) => all.contains(e)).toList();
+    if (explorePages.isNotEmpty) return explorePages.first;
+    return all.first;
+  }
 
   void onSettingsChanged() {
-    var explorePages = List<String>.from(appdata.settings["explore_pages"]);
-    var all = ComicSource.all()
-        .map((e) => e.explorePages)
-        .expand((e) => e.map((e) => e.title))
-        .toList();
-    explorePages = explorePages.where((e) => all.contains(e)).toList();
-    if (!pages.isEqualTo(explorePages)) {
+    var all = allExplorePages;
+    if (current != null && !all.contains(current)) {
       setState(() {
-        pages = explorePages;
-        controller = TabController(length: pages.length, vsync: this);
+        current = all.isEmpty ? null : currentDefault(all);
       });
     }
   }
 
   void onNaviItemTapped(int index) {
-    if (index == 2) {
-      int page = controller.index;
-      String currentPageId = pages[page];
-      GlobalState.find<_SingleExplorePageState>(currentPageId).toTop();
+    if (index == 2 && current != null) {
+      GlobalState.find<_SingleExplorePageState>(current!).toTop();
     }
-  }
-
-  void addPage() {
-    showPopUpWidget(App.rootContext, setExplorePagesWidget());
   }
 
   NaviPaneState? naviPane;
 
   @override
   void initState() {
-    pages = List<String>.from(appdata.settings["explore_pages"]);
-    var all = ComicSource.all()
-        .map((e) => e.explorePages)
-        .expand((e) => e.map((e) => e.title))
-        .toList();
-    pages = pages.where((e) => all.contains(e)).toList();
-    controller = TabController(length: pages.length, vsync: this);
+    var all = allExplorePages;
+    if (all.isNotEmpty) {
+      current = currentDefault(all);
+    }
     appdata.settings.addListener(onSettingsChanged);
     NaviPane.of(context).addNaviItemTapListener(onNaviItemTapped);
     super.initState();
@@ -85,23 +80,15 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   void dispose() {
-    controller.dispose();
     appdata.settings.removeListener(onSettingsChanged);
     naviPane?.removeNaviItemTapListener(onNaviItemTapped);
     super.dispose();
   }
 
   void refresh() {
-    int page = controller.index;
-    String currentPageId = pages[page];
-    GlobalState.find<_SingleExplorePageState>(currentPageId).refresh();
-  }
-
-  Tab buildTab(String i) {
-    var comicSource = ComicSource.all().firstWhere(
-      (e) => e.explorePages.any((e) => e.title == i),
-    );
-    return Tab(text: i.ts(comicSource.key), key: Key(i));
+    if (current != null) {
+      GlobalState.find<_SingleExplorePageState>(current!).refresh();
+    }
   }
 
   Widget buildBody(String i) => Material(
@@ -112,56 +99,94 @@ class _ExplorePageState extends State<ExplorePage>
   Widget buildEmpty() {
     var msg = "No Explore Pages".tl;
     msg += '\n';
-    VoidCallback onTap;
-    if (ComicSource.isEmpty) {
-      msg += "Please add some sources".tl;
-      onTap = () {
-        context.to(() => ComicSourcePage());
-      };
-    } else {
-      msg += "Please check your settings".tl;
-      onTap = addPage;
-    }
+    msg += "Please add some sources".tl;
     return NetworkError(
       message: msg,
-      retry: onTap,
+      retry: () {
+        context.to(() => const ComicSourcePage());
+      },
       withAppbar: false,
       buttonText: "Manage".tl,
+    );
+  }
+
+  void openSelector() {
+    showPopUpWidget(
+      App.rootContext,
+      _ExplorePageSelector(
+        current: current,
+        onSelect: (title) {
+          if (mounted) {
+            setState(() => current = title);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget buildTopBar() {
+    final scheme = Theme.of(context).colorScheme;
+    var source = ComicSource.all().firstWhere(
+      (e) => e.explorePages.any((e) => e.title == current),
+    );
+    return Material(
+      color: Wallpapers.enabled ? Colors.transparent : null,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: scheme.outlineVariant.withValues(alpha: 0.6),
+              width: 0.6,
+            ),
+          ),
+        ),
+        padding: EdgeInsets.only(top: context.padding.top),
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            children: [
+              const SizedBox(width: 6),
+              Tooltip(
+                message: "Select Page".tl,
+                child: IconButton(
+                  icon: const Icon(Icons.dashboard_outlined),
+                  onPressed: openSelector,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  current!.ts(source.key),
+                  style: ts.s18.copyWith(fontWeight: FontWeight.w600),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (pages.isEmpty) {
+    var all = allExplorePages;
+    if (all.isEmpty) {
       return buildEmpty();
     }
-
-    Widget tabBar = Material(
-      color: Wallpapers.enabled ? Colors.transparent : null,
-      child: AppTabBar(
-        key: PageStorageKey(pages.toString()),
-        tabs: pages.map((e) => buildTab(e)).toList(),
-        controller: controller,
-        actionButton: TabActionButton(
-          icon: const Icon(Icons.add),
-          text: "Add".tl,
-          onPressed: addPage,
-        ),
-      ),
-    ).paddingTop(context.padding.top);
+    current ??= currentDefault(all);
 
     return Column(
       children: [
-        tabBar,
+        buildTopBar(),
         Expanded(
           child: MediaQuery.removePadding(
             context: context,
             removeTop: true,
-            child: TabBarView(
-              controller: controller,
-              children: pages.map((e) => buildBody(e)).toList(),
-            ),
+            child: buildBody(current!),
           ),
         ),
       ],
@@ -170,6 +195,65 @@ class _ExplorePageState extends State<ExplorePage>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+/// 探索页选择器:列出所有源的探索页面,点选切换。
+class _ExplorePageSelector extends StatelessWidget {
+  const _ExplorePageSelector({required this.current, required this.onSelect});
+
+  final String? current;
+
+  final void Function(String title) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    var sources = ComicSource.all()
+        .where((e) => e.explorePages.isNotEmpty)
+        .toList();
+    return PopUpWidgetScaffold(
+      title: "Explore".tl,
+      body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        children: [
+          for (final source in sources) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Text(
+                source.name,
+                style: ts.s12
+                    .copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    )
+                    .copyWith(letterSpacing: 0.2),
+              ),
+            ),
+            for (final page in source.explorePages)
+              ListTile(
+                title: Text(page.title.ts(source.key)),
+                trailing: page.title == current
+                    ? Icon(Icons.check, color: scheme.primary, size: 20)
+                    : null,
+                onTap: () {
+                  onSelect(page.title);
+                  context.pop();
+                },
+              ),
+          ],
+          const Divider(height: 24),
+          ListTile(
+            leading: const Icon(Icons.tune),
+            title: Text("Explore Settings".tl),
+            onTap: () {
+              context.pop();
+              context.to(() => const SettingsPage(initialPage: 0));
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SingleExplorePage extends StatefulWidget {
@@ -199,14 +283,6 @@ class _SingleExplorePageState extends AutomaticGlobalState<_SingleExplorePage>
     reloadHandler?.call();
   }
 
-  void onSettingsChanged() {
-    var explorePages = appdata.settings["explore_pages"];
-    if (!explorePages.contains(widget.title)) {
-      _wantKeepAlive = false;
-      updateKeepAlive();
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -215,7 +291,6 @@ class _SingleExplorePageState extends AutomaticGlobalState<_SingleExplorePage>
         if (d.title == widget.title) {
           data = d;
           comicSourceKey = source.key;
-          appdata.settings.addListener(onSettingsChanged);
           data.changeListenable?.addListener(onDataChanged);
           return;
         }
@@ -226,7 +301,6 @@ class _SingleExplorePageState extends AutomaticGlobalState<_SingleExplorePage>
 
   @override
   void dispose() {
-    appdata.settings.removeListener(onSettingsChanged);
     data.changeListenable?.removeListener(onDataChanged);
     super.dispose();
   }

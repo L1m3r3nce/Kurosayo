@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:venera_next/components/gesture.dart';
 import 'package:venera_next/components/scroll.dart';
@@ -12,6 +15,7 @@ import 'package:venera_next/features/local_comics/local_comics.dart';
 import 'package:venera_next/features/search/search.dart';
 import 'package:venera_next/features/settings/settings.dart';
 import 'package:venera_next/features/sync/sync.dart';
+import 'package:venera_next/foundation/appdata.dart';
 import 'package:venera_next/foundation/consts.dart';
 import 'package:venera_next/foundation/context.dart';
 import 'package:venera_next/foundation/translations.dart';
@@ -22,7 +26,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var widget = SmoothCustomScrollView(
+    Widget widget = SmoothCustomScrollView(
       slivers: [
         SliverPadding(padding: EdgeInsets.only(top: context.padding.top)),
         const SliverToBoxAdapter(child: _TelegramSearchBar()),
@@ -32,7 +36,189 @@ class HomePage extends StatelessWidget {
         SliverPadding(padding: EdgeInsets.only(top: context.padding.bottom)),
       ],
     );
-    return context.width > changePoint ? widget.paddingHorizontal(8) : widget;
+    if (context.width > changePoint) {
+      widget = widget.paddingHorizontal(8);
+    }
+    return Stack(
+      children: [
+        Positioned.fill(child: widget),
+        const MascotPet(),
+      ],
+    );
+  }
+}
+
+/// 可拖动的看板娘桌宠:待机时上下浮动,点击有果冻弹跳和随机台词。
+class MascotPet extends StatefulWidget {
+  const MascotPet({super.key});
+
+  @override
+  State<MascotPet> createState() => _MascotPetState();
+}
+
+class _MascotPetState extends State<MascotPet>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController idle = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  )..repeat(reverse: true);
+
+  AnimationController? jelly;
+
+  Offset? position;
+
+  String? bubbleText;
+
+  Timer? bubbleTimer;
+
+  static const petSize = Size(110, 124);
+
+  static const lines = [
+    '今天要看什么漫画呀?',
+    '嘿嘿,又见面啦~',
+    '喜欢的漫画记得加收藏哦',
+    '探索页右上角可以换源了',
+    '别盯着我看啦,快去看漫画',
+    '可以把我拖到顺手的位置哦',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    var saved = appdata.implicitData['mascotPosition'];
+    if (saved is List && saved.length == 2) {
+      position = Offset(
+        (saved[0] as num).toDouble(),
+        (saved[1] as num).toDouble(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    idle.dispose();
+    jelly?.dispose();
+    bubbleTimer?.cancel();
+    super.dispose();
+  }
+
+  void onTap() {
+    jelly?.dispose();
+    jelly = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
+    setState(() {
+      bubbleText = lines[math.Random().nextInt(lines.length)];
+    });
+    bubbleTimer?.cancel();
+    bubbleTimer = Timer(const Duration(milliseconds: 2200), () {
+      if (mounted) {
+        setState(() => bubbleText = null);
+      }
+    });
+  }
+
+  void onPanUpdate(DragUpdateDetails details, BoxConstraints constraints) {
+    setState(() {
+      var pos =
+          (position ?? _defaultPosition(constraints)) + details.delta;
+      position = Offset(
+        pos.dx.clamp(0, constraints.maxWidth - petSize.width),
+        pos.dy.clamp(0, constraints.maxHeight - petSize.height),
+      );
+    });
+  }
+
+  void onPanEnd(BoxConstraints constraints) {
+    var pos = position ?? _defaultPosition(constraints);
+    appdata.implicitData['mascotPosition'] = [
+      pos.dx.clamp(0, constraints.maxWidth - petSize.width),
+      pos.dy.clamp(0, constraints.maxHeight - petSize.height),
+    ];
+    appdata.writeImplicitData();
+  }
+
+  Offset _defaultPosition(BoxConstraints constraints) {
+    return Offset(
+      constraints.maxWidth - petSize.width - 12,
+      constraints.maxHeight * 0.48,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final pos = position ?? _defaultPosition(constraints);
+        return Stack(
+          children: [
+            Positioned(
+              left: pos.dx,
+              top: pos.dy,
+              width: petSize.width,
+              child: GestureDetector(
+                onPanUpdate: (d) => onPanUpdate(d, constraints),
+                onPanEnd: (_) => onPanEnd(constraints),
+                onTap: onTap,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (bubbleText != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: scheme.outlineVariant.withValues(alpha: 0.6),
+                          ),
+                        ),
+                        constraints: BoxConstraints(
+                          maxWidth: petSize.width + 60,
+                        ),
+                        child: Text(
+                          bubbleText!,
+                          style: ts.s12.copyWith(color: scheme.onSurface),
+                        ),
+                      ),
+                    AnimatedBuilder(
+                      animation: Listenable.merge([idle, jelly ?? idle]),
+                      builder: (context, child) {
+                        var dy = (idle.value * 2 - 1) * 6;
+                        var scaleY = 1.0;
+                        var j = jelly;
+                        if (j != null && j.isAnimating) {
+                          scaleY = 1 + 0.14 * math.sin(j.value * math.pi * 3) * (1 - j.value);
+                        }
+                        return Transform.translate(
+                          offset: Offset(0, dy),
+                          child: Transform.scale(
+                            scaleX: 1 / scaleY,
+                            scaleY: scaleY,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Image.asset(
+                        'assets/mascot.png',
+                        height: petSize.height,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
