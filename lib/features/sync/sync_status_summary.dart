@@ -44,10 +44,10 @@ class _SyncStatusSummaryState extends State<SyncStatusSummary> {
     } else if (syncStatus.isSyncing) {
       child = SliverToBoxAdapter(
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.primary),
-            borderRadius: BorderRadius.circular(8),
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(12),
           ),
           child: ListTile(
             leading: const Icon(Icons.sync),
@@ -62,12 +62,10 @@ class _SyncStatusSummaryState extends State<SyncStatusSummary> {
     } else {
       child = SliverToBoxAdapter(
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            borderRadius: BorderRadius.circular(8),
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(12),
           ),
           child: ListTile(
             leading: const Icon(Icons.sync),
