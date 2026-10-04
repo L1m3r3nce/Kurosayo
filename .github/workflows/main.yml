@@ -52,14 +52,6 @@ jobs:
         run: python3 .github/scripts/validate_release.py --write-notes release_notes.md
       - uses: actions/download-artifact@v8
         with:
-          name: macos_build
-          path: outputs
-      - uses: actions/download-artifact@v8
-        with:
-          name: ios_build
-          path: outputs
-      - uses: actions/download-artifact@v8
-        with:
           pattern: apk-*
           path: outputs
           merge-multiple: true
@@ -107,8 +99,6 @@ jobs:
         run: |
           shopt -s nullglob
           files=(
-            outputs/*.ipa
-            outputs/*.dmg
             outputs/*.apk
             outputs/*.zip
             outputs/*.exe

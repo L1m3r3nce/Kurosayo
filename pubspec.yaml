@@ -2,7 +2,7 @@ name: venera_next
 description: "Kurosayo - a comic & light novel reader"
 publish_to: 'none'
 homepage: https://github.com/CyrilPeng/venera-next
-version: 1.17.1+227
+version: 1.18.0+228
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
