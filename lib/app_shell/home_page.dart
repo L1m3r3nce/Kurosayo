@@ -440,13 +440,13 @@ class _ContinueReadingState extends State<_ContinueReading> {
             child: Row(
               children: [
                 Text(
-                  'Continue Reading'.tl,
+                  'Continue Reading'.tl.toUpperCase(),
                   style: ts.s12
                       .copyWith(
-                        color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
+                        fontWeight: FontWeight.w500,
                       )
-                      .copyWith(letterSpacing: 0.2),
+                      .copyWith(letterSpacing: 1.2),
                 ),
                 const Spacer(),
                 ClickInkWell(

@@ -758,18 +758,20 @@ class SettingPartTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Telegram graySection 风格:小号灰色标题,无图标、无下边框。
+    // Telegram graySection 风格:小号浅灰+大字距,与正文拉开层级。
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
         child: Text(
-          title,
+          title.toUpperCase(),
           style: ts.s12
               .copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+                fontWeight: FontWeight.w500,
               )
-              .copyWith(letterSpacing: 0.2),
+              .copyWith(letterSpacing: 1.2),
         ),
       ),
     );

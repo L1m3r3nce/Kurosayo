@@ -220,13 +220,13 @@ class _ExplorePageSelector extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
               child: Text(
-                source.name,
+                source.name.toUpperCase(),
                 style: ts.s12
                     .copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
+                      fontWeight: FontWeight.w500,
                     )
-                    .copyWith(letterSpacing: 0.2),
+                    .copyWith(letterSpacing: 1.2),
               ),
             ),
             for (final page in source.explorePages)
