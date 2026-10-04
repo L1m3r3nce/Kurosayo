@@ -152,6 +152,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   Color translateColorSetting() {
     return switch (appdata.settings['color']) {
+      'telegram' => const Color(0xFF3390EC),
       'red' => Colors.red,
       'pink' => Colors.pink,
       'purple' => Colors.purple,
@@ -160,7 +161,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       'blue' => Colors.blue,
       'yellow' => Colors.yellow,
       'cyan' => Colors.cyan,
-      _ => Colors.blue,
+      _ => const Color(0xFF3390EC),
     };
   }
 
@@ -185,16 +186,76 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         'sans-serif',
       ];
     }
+    final isTelegram = primary == const Color(0xFF3390EC);
+    var colorScheme = SeedColorScheme.fromSeeds(
+      primaryKey: primary,
+      secondaryKey: secondary,
+      tertiaryKey: tertiary,
+      brightness: brightness,
+      tones: FlexTones.soft(brightness),
+    );
+    if (isTelegram) {
+      if (brightness == Brightness.dark) {
+        colorScheme = colorScheme.copyWith(
+          primary: const Color(0xFF64B5EF),
+          surface: const Color(0xFF17212B),
+          surfaceContainerLowest: const Color(0xFF0E1621),
+          surfaceContainerLow: const Color(0xFF17212B),
+          surfaceContainer: const Color(0xFF232E3C),
+          surfaceContainerHigh: const Color(0xFF2B3A4C),
+          surfaceContainerHighest: const Color(0xFF2E3E50),
+        );
+      } else {
+        colorScheme = colorScheme.copyWith(
+          primary: const Color(0xFF3390EC),
+          surface: Colors.white,
+          surfaceContainerLowest: Colors.white,
+          surfaceContainerLow: const Color(0xFFFAFAFA),
+          surfaceContainer: const Color(0xFFF4F4F5),
+          surfaceContainerHigh: const Color(0xFFEFEFEF),
+          surfaceContainerHighest: const Color(0xFFE9E9EB),
+        );
+      }
+    }
     return ThemeData(
-      colorScheme: SeedColorScheme.fromSeeds(
-        primaryKey: primary,
-        secondaryKey: secondary,
-        tertiaryKey: tertiary,
-        brightness: brightness,
-        tones: FlexTones.vividBackground(brightness),
-      ),
+      colorScheme: colorScheme,
       fontFamily: font,
       fontFamilyFallback: fallback,
+      scaffoldBackgroundColor: colorScheme.surface,
+      appBarTheme: AppBarTheme(
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: colorScheme.surface,
+      ),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        color: colorScheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+          ),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor:
+            brightness == Brightness.dark
+                ? const Color(0xFF232E3C)
+                : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
           mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),

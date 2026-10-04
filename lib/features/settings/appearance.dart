@@ -62,6 +62,7 @@ class _AppearanceSettingsState extends State<AppearanceSettings> {
           settingKey: "color",
           optionTranslation: {
             "system": "System".tl,
+            "telegram": "Telegram",
             "red": "Red".tl,
             "pink": "Pink".tl,
             "purple": "Purple".tl,
