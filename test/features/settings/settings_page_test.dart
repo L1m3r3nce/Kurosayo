@@ -14,7 +14,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
     expect(find.text('Reading statistics'), findsOneWidget);
-    expect(find.byIcon(Icons.query_stats), findsOneWidget);
+    expect(find.byIcon(Icons.query_stats_outlined), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

@@ -333,7 +333,7 @@ void main() {
         '第02章': '第02章',
       });
       expect(pages.success, isTrue);
-      expect(pages.data, [
+      expect(pages.data.images, [
         '/manga/分类/作者/猫之眼/第01章/001.jpg',
         '/manga/分类/作者/猫之眼/第01章/002.jpg',
       ]);
@@ -512,7 +512,7 @@ void main() {
     final result = await WebDavLibrarySource.loadComicPages('Cat Eye', '第01卷');
 
     expect(result.success, isTrue);
-    expect(result.data, [
+    expect(result.data.images, [
       '/manga/Cat Eye/第01卷/002.jpg',
       '/manga/Cat Eye/第01卷/010.jpg',
     ]);
@@ -527,7 +527,7 @@ void main() {
     final result = await WebDavLibrarySource.loadComicPages('猫之眼[北条司]', '第01卷');
 
     expect(result.success, isTrue);
-    expect(result.data, [
+    expect(result.data.images, [
       '/manga/猫之眼[北条司]/第01卷/002.jpg',
       '/manga/猫之眼[北条司]/第01卷/010.jpg',
     ]);
@@ -581,7 +581,7 @@ void main() {
         '__cbz_range_1': '第02卷',
       });
       expect(pages.success, isTrue);
-      expect(pages.data, [
+      expect(pages.data.images, [
         '/manga/猫之眼[北条司]/0003.jpg',
         '/manga/猫之眼[北条司]/0004.jpg',
       ]);
@@ -611,7 +611,7 @@ void main() {
       expect(details.data.title, 'Flat Export');
       expect(details.data.chapters, isNull);
       expect(pages.success, isTrue);
-      expect(pages.data, [
+      expect(pages.data.images, [
         '/manga/Flat Book/0001.webp',
         '/manga/Flat Book/0002.webp',
       ]);
@@ -635,7 +635,7 @@ void main() {
     expect(details.data.title, 'Broken Book');
     expect(details.data.chapters, isNull);
     expect(pages.success, isTrue);
-    expect(pages.data, ['/manga/Broken Book/001.jpg']);
+    expect(pages.data.images, ['/manga/Broken Book/001.jpg']);
   });
 
   for (final invalidCase in <String, List<Map<String, Object>>>{
@@ -675,7 +675,7 @@ void main() {
         expect(details.data.title, 'Invalid Book');
         expect(details.data.chapters, isNull);
         expect(pages.success, isTrue);
-        expect(pages.data, [
+        expect(pages.data.images, [
           '/manga/Invalid Book/001.jpg',
           '/manga/Invalid Book/002.jpg',
         ]);

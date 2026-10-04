@@ -7,8 +7,11 @@ import 'package:venera_next/foundation/app.dart';
 import 'package:venera_next/foundation/appdata.dart';
 
 void main() {
-  test('does not configure a comic source list by default', () {
-    expect(appdata.settings['comicSourceListUrl'], isEmpty);
+  test('configures the fork comic source list by default', () {
+    expect(
+      appdata.settings['comicSourceListUrl'],
+      'https://cdn.jsdelivr.net/gh/l1m3r3nce/manga_source@main/index.json',
+    );
   });
 
   test('reader settings resolve from global, device, then comic scope', () {
@@ -236,7 +239,7 @@ void main() {
       ).writeAsStringSync('source');
 
       final currentDir = Directory(
-        p.join(baseDir.path, 'com.github.cyrilpeng', 'VeneraNext'),
+        p.join(baseDir.path, 'com.l1m3r3nce', 'Kurosayo'),
       )..createSync(recursive: true);
 
       await App.migrateLegacyWindowsPathForTesting(currentDir.path);
@@ -272,7 +275,7 @@ void main() {
       File(p.join(legacyDir.path, 'appdata.json')).writeAsStringSync('legacy');
 
       final currentDir = Directory(
-        p.join(baseDir.path, 'com.github.cyrilpeng', 'VeneraNext'),
+        p.join(baseDir.path, 'com.l1m3r3nce', 'Kurosayo'),
       )..createSync(recursive: true);
       File(
         p.join(currentDir.path, 'appdata.json'),
@@ -305,7 +308,7 @@ void main() {
       File(p.join(legacyDir.path, 'appdata.json')).writeAsStringSync('legacy');
 
       final currentDir = Directory(
-        p.join(baseDir.path, 'com.github.cyrilpeng', 'VeneraNext'),
+        p.join(baseDir.path, 'com.l1m3r3nce', 'Kurosayo'),
       )..createSync(recursive: true);
       File(p.join(currentDir.path, 'logs.txt')).writeAsStringSync('new log');
 
@@ -340,7 +343,7 @@ void main() {
       File(p.join(legacyDir.path, 'appdata.json')).writeAsStringSync('legacy');
 
       final currentDir = Directory(
-        p.join(baseDir.path, 'com.github.cyrilpeng', 'VeneraNext'),
+        p.join(baseDir.path, 'com.l1m3r3nce', 'Kurosayo'),
       )..createSync(recursive: true);
 
       await App.migrateLegacyWindowsPathForTesting(currentDir.path);

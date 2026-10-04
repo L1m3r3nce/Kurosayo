@@ -76,9 +76,9 @@ class _App {
   static const _windowsCompanyDirectory = 'com.l1m3r3nce';
   static const _windowsProductDirectory = 'Kurosayo';
   static const _legacyWindowsDirectories = [
-    ('CyrilPeng_venera-next', 'Kurosayo'),
-    ('CyrilPeng_venera-next', 'venera'),
     ('com.l1m3r3nce', 'venera'),
+    ('CyrilPeng_venera-next', 'VeneraNext'),
+    ('com.github.wgh136', 'venera'),
   ];
 
   void rootPop() {

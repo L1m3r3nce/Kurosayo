@@ -846,7 +846,13 @@
     "Automatic reading is paused": "自动阅读已暂停",
     "Deselect all": "取消全选",
     "Select all": "全选",
-    "Failed to load source": "无法加载来源"
+    "Failed to load source": "无法加载来源",
+    "Continue Reading": "继续阅读",
+    "Explore Settings": "探索设置",
+    "Kurosayo is a free and open-source app for comic reading.": "Kurosayo 是一款免费开源的漫画阅读应用。",
+    "Select Page": "选择页面",
+    "Sources": "漫画源",
+    "Text chapters have no images to favorite": "文字章节没有可收藏的图片"
   },
   "zh_TW": {
     "Sync mode": "同步模式",
@@ -1695,6 +1701,12 @@
     "Automatic reading is paused": "自動閱讀已暫停",
     "Deselect all": "取消全選",
     "Select all": "全選",
-    "Failed to load source": "無法載入來源"
+    "Failed to load source": "無法載入來源",
+    "Continue Reading": "繼續閱讀",
+    "Explore Settings": "探索設定",
+    "Kurosayo is a free and open-source app for comic reading.": "Kurosayo 是一款免費開源的漫畫閱讀應用。",
+    "Select Page": "選擇頁面",
+    "Sources": "漫畫源",
+    "Text chapters have no images to favorite": "文字章節沒有可收藏的圖片"
   }
 }
