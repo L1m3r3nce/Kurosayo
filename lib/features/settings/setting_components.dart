@@ -234,9 +234,7 @@ class _DoubleLineSelectSettingsState extends State<_DoubleLineSelectSettings> {
         var rect = offset & size;
         showMenu(
           elevation: 3,
-          color: context.brightness == Brightness.light
-              ? const Color(0xFFF6F6F6)
-              : const Color(0xFF1E1E1E),
+          color: context.colorScheme.surfaceContainerHigh,
           context: context,
           position: RelativeRect.fromRect(
             rect,
@@ -510,7 +508,10 @@ class PopupWindowSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(title),
-      trailing: const Icon(Icons.arrow_right),
+      trailing: Icon(
+        Icons.chevron_right,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
       onTap: () {
         showPopUpWidget(App.rootContext, builder());
       },
@@ -757,22 +758,18 @@ class SettingPartTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Telegram graySection 风格:小号灰色标题,无图标、无下边框。
     return SliverToBoxAdapter(
-      child: Container(
-        padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: context.colorScheme.onSurface.withValues(alpha: 0.1),
-            ),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 24),
-            const SizedBox(width: 8),
-            Text(title, style: ts.s18),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+        child: Text(
+          title,
+          style: ts.s12
+              .copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              )
+              .copyWith(letterSpacing: 0.2),
         ),
       ),
     );

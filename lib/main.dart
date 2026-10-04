@@ -276,7 +276,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           mouseCursor: WidgetStatePropertyAll(SystemMouseCursors.click),
         ),
       ),
-      listTileTheme: ListTileThemeData(),
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+        minVerticalPadding: 12,
+      ),
     );
   }
 

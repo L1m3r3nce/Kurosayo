@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:venera_next/components/gesture.dart';
+import 'package:venera_next/foundation/app.dart';
 import 'package:venera_next/foundation/context.dart';
 import 'package:venera_next/foundation/translations.dart';
 import 'package:venera_next/foundation/widget_utils.dart';
@@ -42,15 +43,28 @@ class _SettingsPageState extends State<SettingsPage> {
   ];
 
   final icons = <IconData>[
-    Icons.explore,
-    Icons.book,
-    Icons.query_stats,
-    Icons.auto_awesome,
-    Icons.collections_bookmark_rounded,
-    Icons.apps,
-    Icons.public,
-    Icons.info,
-    Icons.bug_report,
+    Icons.explore_outlined,
+    Icons.book_outlined,
+    Icons.query_stats_outlined,
+    Icons.auto_awesome_outlined,
+    Icons.collections_bookmark_outlined,
+    Icons.apps_outlined,
+    Icons.public_outlined,
+    Icons.info_outlined,
+    Icons.bug_report_outlined,
+  ];
+
+  /// Telegram 设置页风格:每行一个独立的彩色圆角方块图标。
+  final iconColors = <Color>[
+    const Color(0xFF22B8CF), // Explore
+    const Color(0xFF2AABEE), // Reading
+    const Color(0xFF7E5CE6), // Reading statistics
+    const Color(0xFFEC407A), // Personalize
+    const Color(0xFFF59E0B), // Local Favorites
+    const Color(0xFF8B8D8F), // APP
+    const Color(0xFF26A269), // Network
+    const Color(0xFF4DA3FF), // About
+    const Color(0xFFE5484D), // Debug
   ];
 
   @override
@@ -122,6 +136,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget buildLeft() {
     return Material(
+      color: colors.surface,
       child: Column(
         children: [
           SizedBox(height: MediaQuery.of(context).padding.top),
@@ -142,7 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
           ),
-          const SizedBox(height: 4),
+          if (!enableTwoViews) const _ProfileHeader(),
           Expanded(child: buildCategories()),
         ],
       ),
@@ -157,33 +172,41 @@ class _SettingsPageState extends State<SettingsPage> {
         key: ValueKey(id),
         duration: const Duration(milliseconds: 200),
         width: double.infinity,
-        height: 46,
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+        height: 52,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: selected ? colors.primaryContainer.toOpacity(0.36) : null,
-          border: Border(
-            left: BorderSide(
-              color: selected ? colors.primary : Colors.transparent,
-              width: 2,
-            ),
-          ),
+          color: selected ? colors.surfaceContainerHigh : null,
+          borderRadius: enableTwoViews ? BorderRadius.circular(10) : null,
         ),
         child: Row(
           children: [
-            Icon(icons[id]),
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: iconColors[id],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icons[id], size: 18, color: Colors.white),
+            ),
             const SizedBox(width: 16),
             Text(name, style: ts.s16),
             const Spacer(),
-            if (selected) const Icon(Icons.arrow_right),
+            if (!enableTwoViews)
+              Icon(
+                Icons.chevron_right,
+                color: colors.onSurfaceVariant,
+              ),
           ],
         ),
       );
 
       return Padding(
         padding: enableTwoViews
-            ? const EdgeInsets.fromLTRB(8, 0, 8, 0)
+            ? const EdgeInsets.symmetric(horizontal: 8, vertical: 2)
             : EdgeInsets.zero,
         child: ClickInkWell(
+          borderRadius: enableTwoViews ? BorderRadius.circular(10) : null,
           onTap: () {
             if (enableTwoViews) {
               setState(() => currentPage = id);
@@ -192,7 +215,7 @@ class _SettingsPageState extends State<SettingsPage> {
             }
           },
           child: content,
-        ).paddingVertical(4),
+        ),
       );
     }
 
@@ -232,6 +255,41 @@ class _SettingsPageState extends State<SettingsPage> {
       8 => const DebugPage(),
       _ => throw UnimplementedError(),
     };
+  }
+}
+
+/// Telegram 设置页顶部的档案头:头像 + 名称 + 状态行。
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 26,
+            backgroundColor: scheme.surfaceContainerHigh,
+            backgroundImage: const AssetImage('assets/mascot.png'),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Kurosayo", style: ts.s18),
+              const SizedBox(height: 2),
+              Text(
+                "v${App.version}",
+                style: ts.s12.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
