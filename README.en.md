@@ -255,7 +255,7 @@ No source or recommended catalog is bundled. Import local comics or configure a 
 
 ### Why are searches, images, or update indicators missing?
 
-Check the extension, login/cookies, service availability, and network. Update tracking additionally requires a valid update date. Contact the relevant maintainer for site/content issues. Reader or extension-runtime problems reproducible independently of a particular site can be reported under the [contribution guidelines](CONTRIBUTING.en.md).
+Check the extension, login/cookies, service availability, and network. Update tracking additionally requires a valid update date. Contact the relevant maintainer for site/content issues. Reader or extension-runtime problems reproducible independently of a particular site can be reported via a GitHub issue.
 
 ### How do I update on Windows?
 
@@ -264,9 +264,9 @@ Run `winget upgrade --id CyrilPeng.VeneraNext --exact`. Public-source availabili
 ## Developer resources
 
 - [Build and Development](doc/development/build.en.md): Flutter/Rust, locked dependencies, tests, and releases.
-- [Contributing](CONTRIBUTING.en.md) · [Project Structure](doc/architecture/project_structure.en.md) · [Dependency Governance](doc/development/dependencies.en.md).
+- [Project Structure](doc/architecture/project_structure.en.md) · [Dependency Governance](doc/development/dependencies.en.md).
 - [Windows Distribution](doc/distribution/windows.en.md) · [Headless Mode](doc/user/headless.en.md).
-- [Security Policy](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Documentation Index](doc/README.en.md).
+- [Documentation Index](doc/README.en.md).
 
 ---
 
