@@ -15,7 +15,6 @@ import 'package:venera_next/features/comic_source/comic_source.dart';
 import 'package:venera_next/foundation/global_state.dart';
 import 'package:venera_next/foundation/res.dart';
 import 'package:venera_next/routing/page_jump_target.dart';
-import 'package:venera_next/foundation/extensions.dart';
 import 'package:venera_next/foundation/translations.dart';
 import 'package:venera_next/foundation/widget_utils.dart';
 import 'package:venera_next/features/settings/settings.dart';
