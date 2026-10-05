@@ -32,11 +32,11 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       build_android: true
-      build_windows: true
+      build_windows: false
       build_macos: false
       build_ios: false
-      build_linux_x64: true
-      build_linux_arm64: true
+      build_linux_x64: false
+      build_linux_arm64: false
     secrets: inherit
 
   Release:
@@ -55,44 +55,6 @@ jobs:
           pattern: apk-*
           path: outputs
           merge-multiple: true
-      - uses: actions/download-artifact@v8
-        with:
-          name: windows_build
-          path: outputs
-      - uses: actions/download-artifact@v8
-        with:
-          name: deb_build
-          path: outputs
-      - uses: actions/download-artifact@v8
-        with:
-          name: arch_build
-          path: outputs
-      - uses: actions/download-artifact@v8
-        with:
-          name: deb_arm64_build
-          path: outputs
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: linux_extra_*
-          path: outputs
-          merge-multiple: true
-      - name: 生成 Winget Manifest
-        if: ${{ !contains(github.ref_name, '-') }}
-        run: |
-          version="${GITHUB_REF_NAME#v}"
-          python3 .github/scripts/generate_winget_manifest.py \
-            --version "$version" \
-            --installer "outputs/VeneraNext-${version}-windows-installer.exe" \
-            --release-date "$(date -u +%F)" \
-            --output outputs/winget \
-            --print-path
-      - uses: actions/upload-artifact@v7
-        if: ${{ !contains(github.ref_name, '-') }}
-        with:
-          name: winget_manifest
-          path: outputs/winget/manifests
-          if-no-files-found: error
-          retention-days: 14
       - name: 创建草稿 Release 并上传资产
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -100,12 +62,6 @@ jobs:
           shopt -s nullglob
           files=(
             outputs/*.apk
-            outputs/*.zip
-            outputs/*.exe
-            outputs/*.deb
-            outputs/*.rpm
-            outputs/*.zst
-            outputs/*.AppImage
           )
           if (( ${#files[@]} == 0 )); then
             echo "没有找到可发布的构建产物。" >&2
