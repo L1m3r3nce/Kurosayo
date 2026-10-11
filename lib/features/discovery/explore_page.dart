@@ -236,7 +236,8 @@ class _ExplorePageSelector extends StatelessWidget {
                     : null,
                 onTap: () {
                   onSelect(page.title);
-                  context.pop();
+                  // 弹窗内容在 PopUpWidget 的嵌套 Navigator 里,context.pop() 只会弹掉内层路由,黑色遮罩会残留
+                  App.rootPop();
                 },
               ),
           ],
@@ -245,8 +246,10 @@ class _ExplorePageSelector extends StatelessWidget {
             leading: const Icon(Icons.tune),
             title: Text("Explore Settings".tl),
             onTap: () {
-              context.pop();
-              context.to(() => const SettingsPage(initialPage: 0));
+              App.rootPop();
+              App.mainNavigatorKey?.currentContext?.to(
+                () => const SettingsPage(initialPage: 0),
+              );
             },
           ),
         ],
